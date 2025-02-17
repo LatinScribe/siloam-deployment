@@ -50,7 +50,7 @@ export default function BlogListPage() {
 
     const router = useRouter();
     
-    
+    try {
     useEffect(() => {
         if (!router.isReady) return;
         const { title, sort, page, content, tag, template } = router.query;
@@ -72,6 +72,10 @@ export default function BlogListPage() {
         }
         
     }, [searchQuery, sortOption, currentPage]);
+    } catch (error) {
+        console.error("Search failed:", error);
+        toast.error("Failed to fetch blogs.");
+    }
 
     // useEffect(() => {
     //     // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
@@ -84,19 +88,19 @@ export default function BlogListPage() {
     //     }
     // }, [searchQuery]);
     
-
     const fetchAndSetBlogs = async () => {
         try {
             
             const response = await fetchBlogs(sortOption, currentPage, pageSize, session, searchQuery, searchContent, searchTag, searchTemplate);
             setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
             setPageCount(response.totalPages);  
+            console.log("fetchAndSetBlogs", searchQuery, sortOption);
+            console.log(blogs);
         } catch (error) {
             console.error("Search failed:", error);
             toast.error("Failed to fetch blogs.");
+            return;
         }
-        console.log("fetchAndSetBlogs", searchQuery, sortOption);
-        console.log(blogs);
 
         // const query: { [key: string]: string } = {};
         // if (searchQuery) query.query = searchQuery;
@@ -107,7 +111,8 @@ export default function BlogListPage() {
         //     pathname: "/blogs",
         //     query: { search },
         // });
-    };
+    }; 
+    
     const updateUrl = (queryUpdates: { [key: string]: string | number }) => {
         const newQuery = {
             title: searchQuery || undefined,
@@ -154,7 +159,8 @@ export default function BlogListPage() {
         setCurrentPage(page);
         updateUrl({page});
     };
-  
+    
+    try {
     return (
         <div className="flex justify-center">
             <div className="flex flex-col justify-center container pt-10 px-5 gap-5">
@@ -265,12 +271,17 @@ export default function BlogListPage() {
                                 }`}
                                 // disabled={currentPage <= 1}
                                 onClick={() => {
+                                    try {
                                     if (currentPage > 1) {
                                         const newPage = currentPage - 1;
                                         setCurrentPage(newPage); // Update the current page state
                                         fetchAndSetBlogs();     // Fetch and set blogs for the updated page
                                     }
+                                } catch (error) {
+                                    console.error("Search failed:", error);
+                                    toast.error("Failed to fetch blogs.");
                                 }}
+                            }
                             >
                                 Previous
                             </PaginationPrevious>
@@ -281,9 +292,14 @@ export default function BlogListPage() {
                                     <PaginationLink
                                         isActive={currentPage === index + 1}
                                         onClick={() => {
+                                            try {
                                             // update current page and fetch blogs for that page
                                             setCurrentPage(index + 1); 
                                             fetchAndSetBlogs();
+                                            } catch (error) {
+                                                console.error("Search failed:", error);
+                                                toast.error("Failed to fetch blogs.");
+                                            }
                                         }}
                                     >
                                         {index + 1}
@@ -298,11 +314,16 @@ export default function BlogListPage() {
                                     }`}
                                     // disabled={currentPage >= pageCount}
                                     onClick={() => {
+                                        try {
                                         if (currentPage < pageCount) {
                                             const newPage = currentPage + 1;
                                             setCurrentPage(newPage); // update the current page state
                                             fetchAndSetBlogs();
                                         }
+                                    } catch (error) {
+                                        console.error("Search failed:", error);
+                                        toast.error("Failed to fetch blogs.");
+                                    }
                                     }}
                                 >
                                     Next
@@ -313,5 +334,9 @@ export default function BlogListPage() {
                 </div>
             </div>
         </div>
-    );
+    ); }
+    catch (error) {
+        console.error("Search failed:", error);
+        toast.error("Failed to fetch blogs.");
+    }
 }

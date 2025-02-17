@@ -3,7 +3,7 @@ import { Session, PaginationInfo, Filters, Template, BlogPost, Comment, Report }
 //const nodeEnv: string = (process.env.NODE_ENV as string);
 //export const API_URL = process.env.API_URL;
 //export const API_URL = nodeEnv
-export const API_URL = "http://localhost:3000";
+export const API_URL = process.env.API_URL;
 
 export async function fetchTemplates(filters: Filters, page: number, pageSize: number): Promise<{ templates: Template[], pagination: PaginationInfo }> {
     try {
