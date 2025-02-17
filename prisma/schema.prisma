@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// core stock model
+
+model Stock {
+  id          Int      @id @default(autoincrement())
+  symbol      String   @unique // unique stock symbol, at least 2 char, alpha-numeric, editable by admin
+  name        String   // stock name, at least 2 char, alpha-numeric, editable by admin
+  description String?  // optional, at least 2 char
+  sentiment   Float?    // sentiment score,  0 to 1
+  popularity  Float?    // popularity score, 0 to 1
+  createdAt   DateTime @default(now()) // this should not be manually modified
+  updatedAt   DateTime @updatedAt @default(now()) // this should not be manually modified
+
+  stockPrices StockPrice[]
+}
+
+// stock price model
+
+model StockPrice {
+  id        Int      @id @default(autoincrement())
+  price     Float
+  date      DateTime @default(now())
+  stock     Stock    @relation(fields: [stockId], references: [id])
+  stockId   Int
+}
+
+// user and blogging models
+
+model User {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique // unique username per account, at least 2 char, alpha-numeric, editable by user
+  password    String // at least 8 chars, 1 lower, 1 upper, 1 number, 1 special
+  salt        String // salting the password!
+  firstName   String? // optional, at least 2 char
+  lastName    String? // optional, at least 2 char
+  email       String   @unique // unique email per account, this should only be changed by admin
+  avatar      String? // optional, expecting a URL or a encoded image
+  phoneNumber String? // optional, valid phone number
+  role        String   @default("USER") // USER or ADMIN
+  deleted     Boolean  @default(false) // store whether user deleted for soft delete
+  createdAt   DateTime @default(now()) // this should not be manually modified
+  updatedAt   DateTime @updatedAt @default(now()) // this should not be manually modified
+
+  blogPosts     BlogPost[]
+  comments      Comment[]
+}
+
+model BlogPost {
+  id               Int              @id @default(autoincrement())
+  title            String
+  description      String
+  tags             String
+  createdAt        DateTime         @default(now())
+  flagged          Boolean          @default(false)        
+  upvoteCount      Int              @default(0)
+  downvoteCount    Int              @default(0)
+  upvotes          BlogPostUpvote[]
+  downvotes        BlogPostDownvote[]
+  reportsCount     Int              @default(0)
+  hidden           Boolean          @default(false)
+  author           User             @relation(fields: [authorId], references: [id])
+  authorId         Int
+  deleted          Boolean          @default(false)
+
+  comments Comment[]
+  Report   Report[]
+}
+
+model BlogPostUpvote {
+  id          Int      @id @default(autoincrement())
+  blogPost    BlogPost @relation(fields: [blogPostId], references: [id])
+  blogPostId  Int
+  userId      Int
+}
+
+model BlogPostDownvote {
+  id          Int      @id @default(autoincrement())
+  blogPost    BlogPost @relation(fields: [blogPostId], references: [id])
+  blogPostId  Int
+  userId      Int
+}
+
+model Comment {
+  id               Int              @id @default(autoincrement())
+  blogPost         BlogPost         @relation(fields: [blogPostId], references: [id])
+  blogPostId       Int
+  createdAt        DateTime         @default(now())
+  author           User             @relation(fields: [authorId], references: [id])
+  authorId         Int        
+  content          String       
+  upvoteCount      Int              @default(0)
+  downvoteCount    Int              @default(0)
+  upvotes          CommentUpvote[]
+  downvotes        CommentDownvote[]
+  reportsCount     Int              @default(0)
+  hidden           Boolean          @default(false)
+  parentCommentId  Int?
+  parentComment    Comment?         @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies          Comment[]        @relation("CommentReplies")
+
+  deleted          Boolean          @default(false)
+
+  Report           Report[]
+}
+
+model CommentUpvote {
+  id          Int      @id @default(autoincrement())
+  comment     Comment  @relation(fields: [commentId], references: [id])
+  commentId   Int
+  userId      Int
+}
+
+model CommentDownvote {
+  id          Int      @id @default(autoincrement())
+  comment     Comment  @relation(fields: [commentId], references: [id])
+  commentId   Int
+  userId      Int
+}
+
+model Report {
+  id            Int       @id @default(autoincrement())
+  explanation   String
+  blogPost      BlogPost? @relation(fields: [blogPostId], references: [id])
+  blogPostId    Int?
+  comment       Comment?  @relation(fields: [commentId], references: [id])
+  commentId     Int?
+  createdAt     DateTime  @default(now())
+
+}
