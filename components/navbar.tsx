@@ -57,14 +57,14 @@ export default function NavBar() {
                         <MixIcon />
                         Siloam
                     </Link>
-                    <Link href="/process-image" className="hover:text-gray-300">
+                    <Link href="/describe-image" className="hover:text-gray-300">
                         Describe Image
                     </Link>
                     <Link href="/generate-image-link" className="hover:text-gray-300">
                         Generate Image Link
                     </Link>
-                    <Link href="/blogs" className="hover:text-gray-300">
-                        Blogs
+                    <Link href="/process-image" className="hover:text-gray-300">
+                        Describe Image Link
                     </Link>
                 </div>
                 <div className="flex md:hidden">
@@ -85,7 +85,7 @@ export default function NavBar() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/process-image" className="hover:text-gray-300">
+                                    <Link href="/describe-image" className="hover:text-gray-300">
                                         Describe Image
                                     </Link>
                                 </li>
@@ -95,8 +95,8 @@ export default function NavBar() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/blogs" className="hover:text-gray-300">
-                                        Blogs
+                                    <Link href="/process-image" className="hover:text-gray-300">
+                                        Describe Image Link
                                     </Link>
                                 </li>
                             </ul>

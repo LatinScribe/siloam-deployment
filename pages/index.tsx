@@ -22,6 +22,7 @@ import Footer from "@/components/footer";
 // Import the Image processing pages
 import ImageUploadPage from "@/components/pages/imageUpload";
 import ImageLinkGeneratorPage from "@/components/pages/imageLinkGenerator";
+import ImageDescribePage from "@/components/pages/imageDescribe";
 
 // Import the router
 import { useRouter } from "next/router";
@@ -62,12 +63,14 @@ export default function Home() {
     switch (router.asPath) { // Use asPath instead of pathname
       case "/":
         //return <WelcomePage />;
-        return <ImageUploadPage />;
+        return <ImageDescribePage />;
 
       case "/process-image":
         return <ImageUploadPage />;
       case "/generate-image-link":
         return <ImageLinkGeneratorPage />;
+      case "/describe-image":
+        return <ImageDescribePage />;
       case "/login":
         return <LoginPage />;
       case "/register":

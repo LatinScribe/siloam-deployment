@@ -1,6 +1,6 @@
 import { SessionContext } from "@/contexts/session";
 import React, { useContext, useState, useEffect } from "react";
-import { processImage } from "@/utils/imageInterface";
+import { processImage, proccessImageFile } from "@/utils/imageInterface";
 import { textToAudio} from "@/utils/audioInterface";
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
@@ -9,9 +9,10 @@ import { toast } from "sonner";
 
 type OpenAIVoice = 'alloy' | 'echo' | 'coral' | 'ash';
 
-export default function ImageUploadPage() {
+export default function ImageDescribePage() {
     const { session, setSession } = useContext(SessionContext);
     const [url, setUrl] = useState("");
+    const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState("");
     const [description, setDescription] = useState("");
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -19,21 +20,23 @@ export default function ImageUploadPage() {
     const [selectedVoice, setSelectedVoice] = useState<OpenAIVoice>('alloy');
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-    // router currently unused, but may be useful for future features
-    // you can use it to router user to another page
     const router = useRouter();
 
-    // Initialize audio element
     useEffect(() => {
         setAudioElement(new Audio());
     }, []);
 
-    // Function to handle OpenAI TTS
     const speakWithOpenAI = async (text: string, useExistingAudio: boolean = false) => {
         try {
+            if (!audioElement) {
+                console.error('Audio element is not initialized');
+                toast.error('Audio element is not initialized');
+                return;
+            }
+
             setIsSpeaking(true);
 
-            if (useExistingAudio && audioUrl && audioElement) {
+            if (useExistingAudio && audioUrl) {
                 audioElement.src = audioUrl;
                 audioElement.onended = () => {
                     setIsSpeaking(false);
@@ -56,16 +59,14 @@ export default function ImageUploadPage() {
             // if (!response.ok) {
             //     throw new Error('Failed to generate speech');
             // }
-            
+
             // get the audio from the text
             const response = await textToAudio(text, selectedVoice);
 
-            // Get the audio blob
             const audioBlob = await response.blob();
             const newAudioUrl = URL.createObjectURL(audioBlob);
             setAudioUrl(newAudioUrl);
 
-            // Play the audio
             if (audioElement) {
                 audioElement.src = newAudioUrl;
                 audioElement.onended = () => {
@@ -81,7 +82,6 @@ export default function ImageUploadPage() {
         }
     };
 
-    // Clean up audio element on unmount
     useEffect(() => {
         return () => {
             if (audioElement) {
@@ -93,14 +93,20 @@ export default function ImageUploadPage() {
 
     async function handleInput() {
         try {
-            if (!url) {
-                setError("Please provide an image URL");
+            if (!url && !file) {
+                setError("Please provide an image URL or upload a file");
                 return;
             }
 
-            const result = await processImage(url);
+            let result;
+            if (file) {
+                result = await proccessImageFile(file);
+            } else {
+                result = await processImage(url);
+            }
+
             setDescription(result);
-            speakWithOpenAI(result); // Use OpenAI TTS instead of browser TTS
+            speakWithOpenAI(result);
             setError("");
         } catch (err: any) {
             setError(err.message || "An error occurred while processing the image");
@@ -113,7 +119,7 @@ export default function ImageUploadPage() {
             <h1 className="text-3xl font-semibold mb-8">Image Description Service</h1>
 
             <div className="w-full max-w-2xl space-y-8">
-                {/* URL Input Section */}
+                
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Image URL:</label>
                     <Input
@@ -121,12 +127,21 @@ export default function ImageUploadPage() {
                         placeholder="Paste your image URL here..."
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        className="p-4 border rounded  w-full"
+                        className="p-4 border rounded w-full"
                         required
                     />
                 </div>
 
-                {/* Voice Selection Grid */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Or Upload Image File:</label>
+                    <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                        className="border rounded w-full"
+                    />
+                </div>
+
                 <div className="space-y-4">
                     <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Select Voice:</label>
                     <div className="grid grid-cols-2 gap-4">
@@ -151,7 +166,6 @@ export default function ImageUploadPage() {
                     </div>
                 </div>
 
-                {/* Submit Button */}
                 <div className="flex justify-center mt-6">
                     <Button
                         onClick={handleInput}
@@ -165,14 +179,12 @@ export default function ImageUploadPage() {
                     </Button>
                 </div>
 
-                {/* Error Message */}
                 {error && (
                     <div className="text-red-500 text-center mt-4">
                         {error}
                     </div>
                 )}
 
-                {/* Description Result */}
                 {description && (
                     <div className="mt-8 p-6 bg-blue-900/50 rounded-lg border border-blue-700">
                         <div className="flex justify-between items-center mb-4">
