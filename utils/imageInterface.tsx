@@ -25,21 +25,21 @@ const customAPIOutputPath = process.env.CUSTOM_FILE_OUTPUT_PATH || "NO_api_outpu
  * });
  * ```
  */
-export async function processImage(url: string): Promise<string> {
+export async function processImage(url: string, req: string): Promise<string> {
     try {
         const response = await fetch(`${serverURL}/api/image-process/image`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ imageURL: url }),
+            body: JSON.stringify({ imageURL: url, request: req}),
         });
         const responseData = await response.json();
         console.log(responseData);
         if (!response.ok) {
             throw new Error("An error occurred while processing the image, did not get ok status, got: " + response.status);
         }
-        return responseData.result.message.content;
+        return responseData.response;
     } catch (error) {
         console.error("An error occurred in image Interface while processing the image:", error);
         throw error;

@@ -29,57 +29,33 @@ export default function ImageUploadPage() {
     }, []);
 
     // Function to handle OpenAI TTS
-    const speakWithOpenAI = async (text: string, useExistingAudio: boolean = false) => {
+    async function speakWithOpenAI(text: string) {
         try {
             setIsSpeaking(true);
+            const response = await fetch('/api/audio/generate-speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text, voice: selectedVoice }),
+            });
 
-            if (useExistingAudio && audioUrl && audioElement) {
-                audioElement.src = audioUrl;
-                audioElement.onended = () => {
-                    setIsSpeaking(false);
-                };
-                audioElement.play();
-                return;
+            if (!response.ok) {
+                throw new Error('Failed to generate speech');
             }
 
-            // const response = await fetch('/api/audio/generate-speech', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({
-            //         text,
-            //         voice: selectedVoice
-            //     }),
-            // });
-
-            // if (!response.ok) {
-            //     throw new Error('Failed to generate speech');
-            // }
-            
-            // get the audio from the text
-            const response = await textToAudio(text, selectedVoice);
-
-            // Get the audio blob
-            const audioBlob = await response.blob();
-            const newAudioUrl = URL.createObjectURL(audioBlob);
-            setAudioUrl(newAudioUrl);
-
-            // Play the audio
-            if (audioElement) {
-                audioElement.src = newAudioUrl;
-                audioElement.onended = () => {
-                    setIsSpeaking(false);
-                    URL.revokeObjectURL(newAudioUrl);
-                };
-                audioElement.play();
-            }
+            const audioBlob = await response.blob(); // Get the audio blob
+            const audioUrl = URL.createObjectURL(audioBlob); // Create a URL for the audio blob
+            const audioElement = new Audio(audioUrl); // Create a new audio element
+            await audioElement.play(); // Play the audio
+            console.log("Audio playback started."); // Log when playback starts
         } catch (error) {
-            console.error('Error playing audio:', error);
-            toast.error('An error occurred while playing the audio');
-            setIsSpeaking(false);
+            console.error("An error occurred in audio interface while processing text to speech:", error);
+            throw error;
+        } finally {
+            setIsSpeaking(false); // Ensure isSpeaking is reset
         }
-    };
+    }
 
     // Clean up audio element on unmount
     useEffect(() => {
@@ -100,7 +76,7 @@ export default function ImageUploadPage() {
 
             const result = await processImage(url);
             setDescription(result);
-            speakWithOpenAI(result); // Use OpenAI TTS instead of browser TTS
+            await speakWithOpenAI(result); // Ensure this function is called correctly
             setError("");
         } catch (err: any) {
             setError(err.message || "An error occurred while processing the image");
@@ -155,7 +131,8 @@ export default function ImageUploadPage() {
                 <div className="flex justify-center mt-6">
                     <Button
                         onClick={handleInput}
-                        className={`px-8 py-3 rounded text-lg transition-all ${isSpeaking
+                        className={`px-42 py-50 text-xl font-bold rounded-lg transition-all ${
+                            isSpeaking
                                 ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                                 : 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
                             }`}
@@ -163,6 +140,7 @@ export default function ImageUploadPage() {
                     >
                         {isSpeaking ? 'Processing...' : 'Process Image'}
                     </Button>
+
                 </div>
 
                 {/* Error Message */}
@@ -178,7 +156,7 @@ export default function ImageUploadPage() {
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-semibold">Image Description:</h3>
                             <Button
-                                onClick={() => speakWithOpenAI(description, true)}
+                                onClick={() => speakWithOpenAI(description)}
                                 className="px-4 py-2 bg-blue-600 rounded text-white hover:bg-blue-700"
                                 disabled={isSpeaking}
                             >

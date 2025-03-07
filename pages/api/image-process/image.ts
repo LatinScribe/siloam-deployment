@@ -1,18 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { verifyURL } from "@/utils/verification";
 import OpenAI from "openai";
+import { system_prompt } from "../../../prompts/image_caption_prompt";
 
 // Initialize OpenAI with the provided API key
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Ensure you have an OpenAI API key
 });
 
-/**
- * API handler to process an image URL and return a description.
- * 
- * @param req - The HTTP request object
- * @param res - The HTTP response object
- */
 /**
  * API handler for processing images and generating descriptions using OpenAI's API.
  * 
@@ -49,17 +44,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Extract imageURL from the request body
-    const { imageURL } = req.body as { imageURL: string };
+    const { imageURL, request } = req.body as { imageURL: string, request: string};
 
     // Check if imageURL is provided
     if (!imageURL) {
         return res.status(400).json({
-            error: "Please provide an image URL",
+            error: "Image URL is required",
         });
     }
 
     // Verify the provided URL
-    // TODO: Implement the verifyURL function
     if (!verifyURL(imageURL)) {
         return res.status(400).json({
             error: "Invalid URL provided",
@@ -67,34 +61,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        console.log(`Processing image at: ${imageURL}`);
+        console.log("Request: ", request);
 
-        // Call OpenAI API to process the image and generate a description
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
+        // Call OpenAI API to generate a concise final response
+        const modelResponse = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
             messages: [
+                {
+                    role: "system",
+                    content: system_prompt,
+                },
                 {
                     role: "user",
                     content: [
-                        { type: "text", text: "Describe this image as if speaking to a visually impaired person. Be clear, concise, and focus on useful details without being overly descriptive." },
-                        {
-                            type: "image_url",
-                            image_url: { url: imageURL },
-                        },
-                    ],
-                },
+                    {
+                        "type": "text",
+                        "text": `<DESCRIBE>: ${request}`
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                        "url": `${imageURL}`
+                        }
+                    }
+                    ]
+                }
             ],
+            temperature: 0.7,
+            top_p: 0.9,
+            max_tokens: 150,
             store: true,
         });
 
+        const response = modelResponse.choices[0].message.content;
+
         console.log("Image processed successfully!");
 
-        // Return the result as a JSON object
-        return res.status(200).json({ result: response.choices[0] });
+        // Return both responses as a JSON object
+        console.log(response);
+        return res.status(200).json({ response: response});
     } catch (error) {
         console.error("Error processing image:", error);
-        // const errorMessage = (error as Error).message || "An error occurred while processing the image";
-        const errorMessage = "An error occurred while requesting OpenAI to process the image";
-        return res.status(500).json({ error: errorMessage });
+        return res.status(500).json({ error: "An error occurred while requesting OpenAI to process the image" });
     }
 }

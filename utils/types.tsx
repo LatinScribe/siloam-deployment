@@ -82,3 +82,5 @@ export interface Report {
     blogPostId?: number;
     commentId?: number;
 }
+
+export type OpenAIVoice = 'alloy' | 'echo' | 'coral' | 'ash';
