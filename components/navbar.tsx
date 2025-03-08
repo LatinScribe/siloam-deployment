@@ -63,8 +63,8 @@ export default function NavBar() {
                     <Link href="/generate-image-link" className="hover:text-gray-300">
                         Generate Image Link
                     </Link>
-                    <Link href="/process-image" className="hover:text-gray-300">
-                        Describe Image Link
+                    <Link href="/describe-image-legacy" className="hover:text-gray-300">
+                        Describe Image *Legacy*
                     </Link>
                 </div>
                 <div className="flex md:hidden">
@@ -95,8 +95,8 @@ export default function NavBar() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/process-image" className="hover:text-gray-300">
-                                        Describe Image Link
+                                    <Link href="/describe-image-legacy" className="hover:text-gray-300">
+                                        Describe Image *Legacy*
                                     </Link>
                                 </li>
                             </ul>

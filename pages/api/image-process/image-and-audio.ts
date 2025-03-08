@@ -38,13 +38,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         } 
 
         // Get image description from our API
-        const imageDescription = await processBase64Image(imageFile, audioTranscription);
+        //const imageDescription = await processBase64Image(imageFile, audioTranscription);
+        // Call OpenAI API to generate a concise final response
+        const modelResponse = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: system_prompt,
+                },
+                {
+                    role: "user",
+                    content: [
+                    {
+                        "type": "text",
+                        "text": `<DESCRIBE>: ${audioTranscription}`
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                        "url": `data:image/jpeg;base64,${imageFile}`
+                        }
+                    }
+                    ]
+                }
+            ],
+            temperature: 0.7,
+            top_p: 0.9,
+            max_tokens: 150,
+            store: true,
+        });
+
+        var response = modelResponse.choices[0].message.content;
+        if (!response) {
+            response = "";
+        }
+
 
         // TODO: Add thing for voice, sync with Amaan
         if (!voice) {
             const voice = "alloy";
         }
-        const responseAudio = await textToAudioBlob(imageDescription, voice);
+        const responseAudio = await textToAudioBlob(response, voice);
         console.log("Image and audio processed successfully!");
 
         // Return both responses as a JSON object

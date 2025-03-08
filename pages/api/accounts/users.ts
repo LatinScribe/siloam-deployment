@@ -150,7 +150,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             // filter out all deleted templates
-            users = users.filter((user) => !user.deleted);
+            users = users.filter((user: { deleted: boolean }) => !user.deleted);
 
             // paginate 
             const start = (page_num - 1) * pageSize_num;

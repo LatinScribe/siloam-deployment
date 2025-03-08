@@ -23,6 +23,7 @@ import Footer from "@/components/footer";
 import ImageUploadPage from "@/components/pages/imageUpload";
 import ImageLinkGeneratorPage from "@/components/pages/imageLinkGenerator";
 import ImageDescribePage from "@/components/pages/imageDescribe";
+import ImageDescribeLegacyPage from "@/components/pages/imageDescribeLegacy";
 
 // Import the router
 import { useRouter } from "next/router";
@@ -71,6 +72,8 @@ export default function Home() {
         return <ImageLinkGeneratorPage />;
       case "/describe-image":
         return <ImageDescribePage />;
+      case "/describe-image-legacy":
+        return <ImageDescribeLegacyPage />;
       case "/login":
         return <LoginPage />;
       case "/register":

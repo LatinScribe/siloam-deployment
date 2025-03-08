@@ -43,7 +43,7 @@ export async function textToAudio(text: string, selectedVoice: OpenAIVoice): Pro
     }
 }
 
-export async function textToAudioBlob(text: string, selectedVoice: OpenAIVoice): Promise<Blob> {
+export async function textToAudioBlob(text: string, selectedVoice: OpenAIVoice): Promise<string> {
     try {
         const response = await fetch(`${serverURL}/api/audio/generate-speech`, {
             method: 'POST',
@@ -60,8 +60,12 @@ export async function textToAudioBlob(text: string, selectedVoice: OpenAIVoice):
             throw new Error('Failed to generate speech');
         }
 
-        const audioBlob = await response.blob(); // Get the audio blob
-        return audioBlob;
+        const audioBlob = await response.blob();
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64Audio = buffer.toString("base64");
+
+        return base64Audio;
     } catch (error) {
         console.error("An error occurred in audio interface while processing text to speech:", error);
         throw error;
