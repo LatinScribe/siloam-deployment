@@ -223,7 +223,7 @@ export async function proccessImageFile(image: File): Promise<string> {
         if (!response.ok) {
             throw new Error("An error occurred while processing the image, did not get ok status, got: " + response.status);
         }
-        return responseData.result.message.content;
+        return responseData.response;
     } catch (error) {
         console.error("An error occurred in image Interface while processing the image:", error);
         throw error;

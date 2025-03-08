@@ -31,29 +31,18 @@ export default function ImageUploadPage() {
     // Function to handle OpenAI TTS
     async function speakWithOpenAI(text: string) {
         try {
-            setIsSpeaking(true);
-            const response = await fetch('/api/audio/generate-speech', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text, voice: selectedVoice }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to generate speech');
+            if (!audioElement) {
+                            console.error('Audio element is not initialized');
+                            toast.error('Audio element is not initialized');
+                            return;
             }
-
-            const audioBlob = await response.blob(); // Get the audio blob
-            const audioUrl = URL.createObjectURL(audioBlob); // Create a URL for the audio blob
-            const audioElement = new Audio(audioUrl); // Create a new audio element
-            await audioElement.play(); // Play the audio
-            console.log("Audio playback started."); // Log when playback starts
+            setIsSpeaking(true);
+            await textToAudio(text, selectedVoice);
+            setIsSpeaking(false);
         } catch (error) {
             console.error("An error occurred in audio interface while processing text to speech:", error);
+            toast.error('An error occurred while playing the audio');
             throw error;
-        } finally {
-            setIsSpeaking(false); // Ensure isSpeaking is reset
         }
     }
 
