@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { verifyURL } from "@/utils/verification";
 import OpenAI from "openai";
 import { system_prompt } from "../../../prompts/image_caption_prompt";
-import { processImage } from '@/utils/imageInterface';
+import { processImage, processBase64Image } from '@/utils/imageInterface';
 import { audioToText, textToAudio, textToAudioBlob} from '@/utils/audioInterface';
 import { text } from 'stream/consumers';
 import { OpenAIVoice } from "@/utils/types";
@@ -28,20 +28,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             error: "Image data is required",
         });
     }
-    // Check if the audio file is provided
-    if (!audioFile) {
-        return res.status(400).json({
-            error: "Audio data is required",
-        });
-    }
-
 
     try {
         // Transcribe the audio
-        const audioTranscription = await audioToText(audioFile);
+        // TODO: This is a quick fix for the autoPhoto to work on the mobile side.
+        var audioTranscription = "";
+        if (audioFile) {
+            audioTranscription = await audioToText(audioFile);
+        } 
 
         // Get image description from our API
-        const imageDescription = await processImage(imageFile, audioTranscription);
+        const imageDescription = await processBase64Image(imageFile, audioTranscription);
 
         // TODO: Add thing for voice, sync with Amaan
         if (!voice) {

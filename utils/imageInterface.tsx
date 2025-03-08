@@ -46,6 +46,43 @@ export async function processImage(url: string, req: string): Promise<string> {
     }
 }
 
+export async function processBase64Image(based64Image: string, req: string): Promise<string> {
+    try {
+        // TODO: Enforce user sending an image name
+        const urlResponse = await fetch(`${customAPIurl}/api/image-process/image-url-generate`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ image: based64Image, image_name: "temp", customAPIKey: customAPIKey }), // send the image and the name of the image
+        });
+        // currently using backend for input checking!
+        const urlResponseData = await urlResponse.json();
+
+        if (!urlResponse.ok) {
+            console.log(urlResponseData.error);
+            throw new Error(urlResponseData.error || "Error generating image link. Did not get ok status, got: " + urlResponse.status);
+        }
+        const url: string = urlResponseData.result.image_url;
+        const response = await fetch(`${serverURL}/api/image-process/image`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ imageURL: url, request: req}),
+        });
+        const responseData = await response.json();
+        console.log(responseData);
+        if (!response.ok) {
+            throw new Error("An error occurred while processing the image, did not get ok status, got: " + response.status);
+        }
+        return responseData.response;
+    } catch (error) {
+        console.error("An error occurred in image Interface while processing the image:", error);
+        throw error;
+    }
+}
+
 /**
  * Generates an image link by encoding the image to base64 and sending it to the backend.
  *

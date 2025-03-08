@@ -74,7 +74,7 @@ export default function ImageUploadPage() {
                 return;
             }
 
-            const result = await processImage(url);
+            const result = await processImage(url, "");
             setDescription(result);
             await speakWithOpenAI(result); // Ensure this function is called correctly
             setError("");
