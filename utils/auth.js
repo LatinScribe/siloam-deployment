@@ -15,6 +15,12 @@ export async function hashPassword(password, salt) {
   return await bcrypt.hash(hashed, BCRYPT_SALT_ROUNDS);
 }
 
+export async function hashFileName(filename, salt) {
+  // double hashing with a salt as suggested by TA Amir during Mentor session
+  const hashed = await bcrypt.hash(filename, salt);
+  return await bcrypt.hash(hashed, BCRYPT_SALT_ROUNDS);
+}
+
 export async function hashPasswordSaltOnly(password, salt) {
   // double hashing with a salt as suggested by TA
   return await bcrypt.hash(password, salt);

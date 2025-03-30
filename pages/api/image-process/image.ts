@@ -61,44 +61,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        console.log("Request: ", request);
+        console.log("Request received:", request);
 
         // Call OpenAI API to generate a concise final response
+        console.log("Sending to OpenAI with model gpt-4o-mini");
+        console.log("System prompt:", system_prompt.substring(0, 100) + "...");
+        console.log("User message:", request ? `Please directly answer this question about the image: "${request}"` : "What am I looking at?");
+        
         const modelResponse = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 {
                     role: "system",
-                    content: system_prompt,
+                    content: system_prompt + "\n\nIMPORTANT INSTRUCTION: The user has asked the following specific question: \"" + 
+                              request + "\". Your task is to DIRECTLY answer this question based on the image content. DO NOT just describe the image generally unless no question was asked.",
                 },
                 {
                     role: "user",
                     content: [
-                    {
-                        "type": "text",
-                        "text": `<DESCRIBE>: ${request}`
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                        "url": `${imageURL}`
-                        }
-                    }
-                    ]
-                }
+                        { 
+                            type: "text", 
+                            text: request ? `ANSWER THIS QUESTION DIRECTLY: "${request}"` : "What am I looking at?"
+                        },
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: imageURL,
+                            },
+                        },
+                    ],
+                },
             ],
-            temperature: 0.7,
-            top_p: 0.9,
-            max_tokens: 150,
-            store: true,
+            max_tokens: 300,
         });
 
         const response = modelResponse.choices[0].message.content;
 
+        console.log("OpenAI response received");
         console.log("Image processed successfully!");
+        console.log("Response:", response);
 
         // Return both responses as a JSON object
-        console.log(response);
         return res.status(200).json({ response: response});
     } catch (error) {
         console.error("Error processing image:", error);

@@ -14,21 +14,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { description, question } = req.body;
+    const { description, question, imageUrl } = req.body;
 
-    if (!description || !question) {
-        return res.status(400).json({ error: "Description and question are required" });
+    if (!imageUrl || !question) {
+        return res.status(400).json({ error: "Image URL and question are required" });
     }
 
     try {
+        // Use the Vision API format with both text and image
         const response = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 {
                     role: "user",
-                    content: `Based on the following description: "${description}", answer the question: "${question}" in a way that is suitable for visually impaired individuals in 1-2 sentences unless stated otherwise.`,
+                    content: [
+                        { 
+                            type: "text", 
+                            text: question 
+                        },
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: imageUrl,
+                            },
+                        },
+                    ],
                 },
             ],
+            max_tokens: 300,
         });
 
         // TODO: Replace this with a DB call or have this cache get flushed periodically and written to a DB. Or make this client-side
