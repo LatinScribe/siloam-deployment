@@ -31,3 +31,5 @@
 # then deletes all empty folders older than 30 minutes
 30 * * * * sudo find /siloam-deployment/siloam/public/uploaded-images/* -type f -mmin +30 -delete && sudo find /siloam-deployment/siloam/public/uploaded-images/* -type d -empty -mmin +30 -delete
 
+30 * * * * echo 'Ran image clean up service' >> /cronlogs/siloam.log
+
