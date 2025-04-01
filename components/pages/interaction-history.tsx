@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Interaction } from "@/utils/types"; // Assuming you have an Interaction type defined
 import { getInteractions, deleteInteractions } from "@/utils/accountInterface";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -45,10 +46,16 @@ export default function InteractionHistoryPage() {
     useEffect(() => {
         if (!router.isReady) return;
         const { page } = router.query;
-        if (page) setCurrentPage(Number(page));
-
+        const parsedPage = parseInt(page as string, 10);
+        if (!isNaN(parsedPage) && parsedPage > 0) {
+            setCurrentPage(parsedPage);
+            console.log("Current page", currentPage);
+        } else {
+            setCurrentPage(1); // default to page 1
+            console.log("Current page", currentPage);
+        }
         fetchAndSetInteractionHistory();
-    }, [router.query]);
+    }, [router.query, router.isReady]);
 
     useEffect(() => {
         if (router.isReady) {
@@ -61,15 +68,21 @@ export default function InteractionHistoryPage() {
                 { shallow: true }
             );
         }
-        fetchAndSetInteractionHistory();
+        // fetchAndSetInteractionHistory();
     }, [currentPage]);
 
     const fetchAndSetInteractionHistory = async () => {
         if (session && session.accessToken && session.refreshToken) {
             try {
                 const interactions = await getInteractions(session.accessToken, session.refreshToken);
-                setInteractions(interactions.interactions || []);
-                setPageCount(Math.ceil(interactions.numberOfInteractions / pageSize));
+                const inorderedInteractions = interactions.interactions
+                const reverseInteractions = inorderedInteractions.reverse();
+                setInteractions(reverseInteractions || []);
+                setPageCount(Math.ceil(interactions.interactions.length / pageSize));
+                console.log("Page size", pageSize);
+                console.log("Number of interactions", interactions.interactions.length);
+                console.log("Expected page count", Math.ceil(interactions.interactions.length / pageSize));
+                console.log("pageCount", pageCount);
             } catch (error) {
                 console.error("Error fetching interaction history:", error);
             }
@@ -94,17 +107,22 @@ export default function InteractionHistoryPage() {
     const handlePrevPage = () => {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
+            console.log("Current page", currentPage);
+            router.push(`/interaction-history?page=${currentPage - 1}`);
         }
     };
 
     const handleNextPage = () => {
         if (currentPage < pageCount) {
             setCurrentPage(currentPage + 1);
+            console.log("Current page", currentPage);
+            router.push(`/interaction-history?page=${currentPage + 1}`);
         }
     };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+        console.log("Current page", currentPage);
     };
 
     return (
@@ -143,7 +161,7 @@ export default function InteractionHistoryPage() {
                     <p className="text-gray-600">No interaction history available.</p>
                 ) : (
                     interactions
-                        .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                        ?.slice((currentPage - 1) * pageSize, currentPage * pageSize)
                         .map((interaction: Interaction) => (
                             <div key={interaction.id} className="bg-background p-6 border shadow rounded w-full max-w-full">
                                 <h2 className="text-xl font-bold">{interaction.type}</h2>
@@ -164,20 +182,46 @@ export default function InteractionHistoryPage() {
                 <div className="flex justify-center mt-5">
                     <Pagination>
                         <PaginationContent className="flex flex-row justify-center gap-2">
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    className={`${currentPage <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-                                    onClick={handlePrevPage}
-                                >
-                                    Previous
-                                </PaginationPrevious>
-                            </PaginationItem>
+                        <PaginationItem>
+                            <PaginationPrevious
+                                className={`${
+                                    currentPage <= 1 ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                                // disabled={currentPage <= 1}
+                                onClick={() => {
+                                    try {
+                                    if (currentPage > 1) {
+                                        const newPage = currentPage - 1;
+                                        setCurrentPage(newPage); // update the current page state
+                                        console.log("Current page", currentPage);
+                                        router.push(`/interaction-history?page=${newPage}`);
+                                    }
+                                } catch (error) {
+                                    console.error("History fetch failed:", error);
+                                    toast.error("Failed to fetch History.");
+                                }}
+                            }
+                            >
+                                Previous
+                            </PaginationPrevious>
+                        </PaginationItem>
 
                             {Array.from({ length: pageCount }, (_, index) => (
                                 <PaginationItem key={index}>
                                     <PaginationLink
                                         isActive={currentPage === index + 1}
-                                        onClick={() => handlePageChange(index + 1)}
+                                        onClick={() => {
+                                            try {
+                                            // update current page and fetch blogs for that page
+                                            const newPage = index + 1;
+                                            setCurrentPage(newPage); // update the current page state
+                                            console.log("Current page", currentPage);
+                                            router.push(`/interaction-history?page=${newPage}`);
+                                            } catch (error) {
+                                                console.error("History fetch failed:", error);
+                                                toast.error("Failed to fetch history.");
+                                            }
+                                        }}
                                     >
                                         {index + 1}
                                     </PaginationLink>
@@ -186,8 +230,23 @@ export default function InteractionHistoryPage() {
 
                             <PaginationItem>
                                 <PaginationNext
-                                    className={`${currentPage >= pageCount ? "opacity-50 cursor-not-allowed" : ""}`}
-                                    onClick={handleNextPage}
+                                    className={`${
+                                        currentPage >= pageCount ? "opacity-50 cursor-not-allowed" : ""
+                                    }`}
+                                    // disabled={currentPage >= pageCount}
+                                    onClick={() => {
+                                        try {
+                                        if (currentPage < pageCount) {
+                                            const newPage = currentPage + 1;
+                                            setCurrentPage(newPage); // update the current page state
+                                            console.log("Current page", currentPage);
+                                            router.push(`/interaction-history?page=${newPage}`);
+                                        }
+                                    } catch (error) {
+                                        console.error("History fetch failed:", error);
+                                        toast.error("Failed to fetch history.");
+                                    }
+                                    }}
                                 >
                                     Next
                                 </PaginationNext>
