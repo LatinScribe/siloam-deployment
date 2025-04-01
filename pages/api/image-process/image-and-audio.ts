@@ -1,11 +1,12 @@
 // Make this one monolithic API endpoint that can handle both image and audio processing.
 import { NextApiRequest, NextApiResponse } from 'next';
-import { verifyURL } from "@/utils/verification";
+//import { verifyURL } from "@/utils/verification";
 import OpenAI from "openai";
 import { system_prompt } from "../../../prompts/image_caption_prompt";
-import { processImage, processBase64Image } from '@/utils/imageInterface';
-import { audioToText, textToAudio, textToAudioBlob} from '@/utils/audioInterface';
-import { text } from 'stream/consumers';
+//import { processImage, processBase64Image } from '@/utils/imageInterface';
+//import { audioToText, textToAudio, textToAudioBlob} from '@/utils/audioInterface';
+import { audioToText, textToAudioBlob} from '@/utils/audioInterface';
+// import { text } from 'stream/consumers';
 import { OpenAIVoice } from "@/utils/types";
 
 // Initialize OpenAI with the provided API key
@@ -32,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         // Transcribe the audio
         // TODO: This is a quick fix for the autoPhoto to work on the mobile side.
-        var audioTranscription = "";
+        let audioTranscription = "";
         if (audioFile) {
             audioTranscription = await audioToText(audioFile);
         } 
@@ -69,16 +70,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             store: true,
         });
 
-        var response = modelResponse.choices[0].message.content;
+        let response = modelResponse.choices[0].message.content;
         if (!response) {
             response = "";
         }
 
 
         // TODO: Add thing for voice, sync with Amaan
-        if (!voice) {
-            const voice = "alloy";
+        let voice_used = voice;
+        if (!voice_used) {
+            voice_used = "alloy";
         }
+        console.log("Voice: ", voice_used);
+        
         const responseAudio = await textToAudioBlob(response, voice);
         console.log("Image and audio processed successfully!");
 

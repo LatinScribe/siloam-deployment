@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
     // ======== TOKEN HANDLING STARTS HERE ==========
     const { x_refreshToken } = req.headers;
-    var payload = null
+    let payload = null
     try {
         // attempt to verify the provided access token!!
         payload = verifyToken(req.headers.authorization);
@@ -189,6 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
         } catch (error) {
+            console.log(error)
             return res.status(500).json({
                 error: "Prisma error!",
             });
@@ -224,6 +225,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             return res.status(201).json({ user });
         } catch (error) {
+            console.log(error)
             return res.status(500).json({
                 error: "Error creating user! Unsuccessful! Please try again!",
             });
@@ -371,7 +373,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const salt = user.salt
 
-            var new_password = undefined
+            let new_password = undefined
             if (password) {
                 new_password = await hashPassword(password, salt)
             }
@@ -467,6 +469,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     username: true,
                 },
             });
+            console.log("Deleted user: ", updated_user)
             return res.status(200).json({ message: "User deleted successfully" });
         } catch (error) {
             console.log(error);

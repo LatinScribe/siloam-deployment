@@ -61,11 +61,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // credentials valid, generating access and refresh tokens....
         // set to be an hour from now
-        var milliseconds_hour = new Date().getTime() + (1 * 60 * 60 * 1000);
+        const milliseconds_hour = new Date().getTime() + (1 * 60 * 60 * 1000);
         const one_hour_later = new Date(milliseconds_hour)
 
         // set to be a day from now
-        var milliseconds_day = new Date().getTime() + (24 * 60 * 60 * 1000);
+        const milliseconds_day = new Date().getTime() + (24 * 60 * 60 * 1000);
         const one_day_later = new Date(milliseconds_day)
 
         const Accesstoken = generateAccessToken({ role: user.role, username: user.username, expiresAt: one_hour_later });

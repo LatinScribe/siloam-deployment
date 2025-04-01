@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { SessionContext } from "@/contexts/session";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { CodeIcon, FaceIcon, MixIcon, Pencil2Icon, PersonIcon } from "@radix-ui/react-icons";
+import { CodeIcon, FaceIcon, MixIcon, PersonIcon } from "@radix-ui/react-icons";
 import {
     Sheet,
     SheetContent,
@@ -32,7 +32,7 @@ export default function NavBar() {
     const { session, logout } = useContext(SessionContext);
     const { theme, setTheme } = useTheme();
 
-    const { reward, isAnimating } = useReward('rewardId', 'confetti');
+    const { reward } = useReward('rewardId', 'confetti');
 
     useEffect(() => {
         console.log('aaaa')
@@ -142,17 +142,17 @@ export default function NavBar() {
                                     </SheetHeader>
                                     <ul className="space-y-4">
                                         <li>
-                                            <Link href="/my-templates" className="flex items-center space-x-2">
+                                            <Link href="/interaction-history" className="flex items-center space-x-2">
                                                 <CodeIcon />
-                                                <span>My Templates</span>
+                                                <span>My Interaction History</span>
                                             </Link>
                                         </li>
-                                        <li>
+                                        {/* <li>
                                             <Link href="/my-blogs" className="flex items-center space-x-2">
                                                 <Pencil2Icon />
                                                 <span>My Blogs</span>
                                             </Link>
-                                        </li>
+                                        </li> */}
                                         <li>
                                             <Link href="/profile" className="flex items-center space-x-2">
                                                 <PersonIcon />
@@ -172,6 +172,12 @@ export default function NavBar() {
                                                     <Link href="/admin-account" className="flex items-center space-x-2 text-primary">
                                                         <FaceIcon />
                                                         <span>(Admin) User Management</span>
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link href="/admin-add-interaction" className="flex items-center space-x-2 text-primary">
+                                                        <FaceIcon />
+                                                        <span>(Admin) Modify Interaction</span>
                                                     </Link>
                                                 </li>
                                             </>

@@ -1,5 +1,6 @@
 // import { API_URL } from "./dataInterface";
 // import { User, Session } from "./types";
+import { Message } from "./types"
 
 
 const customAPIKey = process.env.CUSTOM_FILE_API_KEY || "NO_api_key";
@@ -37,6 +38,41 @@ export async function processImage(imageUrl: string, question: string): Promise<
             body: JSON.stringify({
                 imageURL: imageUrl,
                 request: question
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to process image');
+        }
+        
+        const data = await response.json();
+        return data.response;
+    } catch (error) {
+        console.error("An error occurred in image interface while processing image:", error);
+        throw error;
+    }
+}
+
+export async function processImageWithHistory(imageUrl: string, conversation: Message[], request: string): Promise<string> {
+    try {
+        console.log("Processing image with question:", request);
+
+        // Gather the role, content pair from the message
+        var filteredConversation: Message[] = [];
+
+        for (let i = 0; i < conversation.length; i++) {
+            filteredConversation.push({role: conversation[i]['role'], content: conversation[i]['content']});
+        }
+        
+        const response = await fetch(`${serverURL}/api/image-process/image-with-history`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                imageURL: imageUrl,
+                convoHistory: filteredConversation,
+                request: request
             }),
         });
 

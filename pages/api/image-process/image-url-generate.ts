@@ -105,7 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const salt = await generateSalt(); // generate a random salt
         const hashedFileName = await hashFileName(image_name, salt);
         const ext = getFileExtension(image_name); // get the file extension
-        var pre_string = `${hashedFileName}`;
+        let pre_string = `${hashedFileName}`;
         pre_string = pre_string.replace(/[/\\?%*:.|"<>]/g, '-'); // replace invalid characters with '-'
 
         let imageFileName = pre_string + "." + ext; // make sure to put file extension back in

@@ -1,5 +1,5 @@
 import { API_URL } from "./dataInterface";
-import { User, Session } from "./types";
+import { User, Session, Interaction, InteractionHistory } from "./types";
 
 const customAPIKey = process.env.CUSTOM_FILE_API_KEY || "NO_api_key";
 const customAPIurl = process.env.CUSTOM_FILE_API_PATH || "NO_api_url";
@@ -302,6 +302,109 @@ export async function searchUsers(username: string): Promise<User[] | boolean> {
         return responseData;
     } catch (error) {
         console.error("An error occurred during user register:", error);
+        throw error;
+    }
+}
+
+export async function getInteractions(accessToken: string, refreshToken: string): Promise<InteractionHistory> {
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/interactions`, {
+            method: "GET",
+            headers: {
+                "x_refreshToken": refreshToken,
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        // returns the interactions history object
+        // create a new Interaction history object with the interactions array and the total number of interactions
+        // make this explicitly to be safe
+        const interactionHistory: InteractionHistory = {
+            interactions: responseData.interactions,
+            numberOfInteractions: responseData.totalInteractions,
+            deleted: responseData.deleted,
+        };
+        return interactionHistory;
+    } catch (error) {
+        console.error("An error occurred during interactions retrieval:", error);
+        throw error;
+    }
+}
+
+export async function addInteraction(accessToken: string, refreshToken: string, interaction: any): Promise<Interaction> {
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/interactions`, {
+            method: "PUT",
+            headers: {
+                "x_refreshToken": refreshToken,
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(interaction),
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 201) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        // returns the added interaction object
+        // explicity create a new Interaction object to be safe
+        const interactionObject: Interaction = {
+            id: responseData.added_interaction.id,
+            userId: responseData.added_interaction.userId,
+            type: responseData.added_interaction.type,
+            question: responseData.added_interaction.question,
+            imageUrl: responseData.added_interaction.imageUrl,
+            timestamp: responseData.added_interaction.timestamp,
+        }
+        return interactionObject;
+    } catch (error) {
+        console.error("An error occurred during interaction addition:", error);
+        throw error;
+    }
+}
+
+export async function deleteInteractions(accessToken: string, refreshToken: string): Promise<boolean> {
+    // delete the interaction history i.e all interactions of the user
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/interactions`, {
+            method: "DELETE",
+            headers: {
+                "x_refreshToken": refreshToken,
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        // returns true if the interaction history was deleted successfully
+        return true;
+    } catch (error) {
+        console.error("An error occurred during interaction deletion:", error);
         throw error;
     }
 }

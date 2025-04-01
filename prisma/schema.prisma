@@ -13,31 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// core stock model
-
-model Stock {
-  id          Int      @id @default(autoincrement())
-  symbol      String   @unique // unique stock symbol, at least 2 char, alpha-numeric, editable by admin
-  name        String   // stock name, at least 2 char, alpha-numeric, editable by admin
-  description String?  // optional, at least 2 char
-  sentiment   Float?    // sentiment score,  0 to 1
-  popularity  Float?    // popularity score, 0 to 1
-  createdAt   DateTime @default(now()) // this should not be manually modified
-  updatedAt   DateTime @updatedAt @default(now()) // this should not be manually modified
-
-  stockPrices StockPrice[]
-}
-
-// stock price model
-
-model StockPrice {
-  id        Int      @id @default(autoincrement())
-  price     Float
-  date      DateTime @default(now())
-  stock     Stock    @relation(fields: [stockId], references: [id])
-  stockId   Int
-}
-
 // user and blogging models
 
 model User {
@@ -57,6 +32,17 @@ model User {
 
   blogPosts     BlogPost[]
   comments      Comment[]
+  interactions   Interaction[]
+}
+
+model Interaction {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  timestamp   DateTime @default(now())
+  type      String    @default("UNKOWN") // type of interaction
+  question  String?   // question asked by user
+  imageUrl String? // optional, expecting a URL or a encoded image
 }
 
 model BlogPost {
@@ -140,4 +126,29 @@ model Report {
   commentId     Int?
   createdAt     DateTime  @default(now())
 
+}
+
+// core stock model
+
+model Stock {
+  id          Int      @id @default(autoincrement())
+  symbol      String   @unique // unique stock symbol, at least 2 char, alpha-numeric, editable by admin
+  name        String   // stock name, at least 2 char, alpha-numeric, editable by admin
+  description String?  // optional, at least 2 char
+  sentiment   Float?    // sentiment score,  0 to 1
+  popularity  Float?    // popularity score, 0 to 1
+  createdAt   DateTime @default(now()) // this should not be manually modified
+  updatedAt   DateTime @updatedAt @default(now()) // this should not be manually modified
+
+  stockPrices StockPrice[]
+}
+
+// stock price model
+
+model StockPrice {
+  id        Int      @id @default(autoincrement())
+  price     Float
+  date      DateTime @default(now())
+  stock     Stock    @relation(fields: [stockId], references: [id])
+  stockId   Int
 }

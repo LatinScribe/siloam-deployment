@@ -83,4 +83,27 @@ export interface Report {
     commentId?: number;
 }
 
+
+export interface Interaction {
+    id: number;
+    userId: number;
+    type: string;
+    question?: string;
+    imageUrl?: string;
+    timestamp: Date;
+}
+
+export interface InteractionHistory {
+    interactions: Interaction[]; // list of interactions
+    deleted: boolean; // if the user has deleted their account, we should not show their history
+    numberOfInteractions: number; // number of interactions the user has made
+}
 export type OpenAIVoice = 'alloy' | 'echo' | 'coral' | 'ash';
+
+
+export type Message = {
+  id?: string;
+  role: 'user' | 'assistant' | 'system';
+  content: any;
+  timestamp?: Date;
+};

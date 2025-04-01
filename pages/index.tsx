@@ -1,10 +1,10 @@
-import Image from "next/image";
+//import Image from "next/image";
 import localFont from "next/font/local";
 import { SessionContext } from "@/contexts/session";
 import React, { useEffect, useContext } from "react";
 
 // Import default pages
-import WelcomePage from "@/components/pages/welcome";
+//import WelcomePage from "@/components/pages/welcome";
 import LoginPage from "@/components/pages/login";
 import MyBlogsPage from "@/components/pages/myblogs";
 import BlogListPage from "@/components/pages/blogList";
@@ -14,6 +14,11 @@ import Custom404 from "@/components/pages/404";
 import ProfilePage from "@/components/pages/profile";
 import WorkInProgress from "@/components/pages/work-in-progress";
 import MyTemplatesPage from "@/components/pages/mytemplates";
+import AdminAccount from "@/components/pages/admin-account";
+import AdminProfile from "@/components/pages/admin-profile";
+import AdminContentPage from "@/components/pages/admin-content";
+import InteractionHistoryPage from "@/components/pages/interaction-history";
+import AdminAddInteractionPage from "@/components/pages/admin-add-interaction";
 
 // Import the components
 import NavBar from "@/components/navbar";
@@ -59,6 +64,14 @@ export default function Home() {
     return null;
   }
 
+  if (session) {
+    // pass
+  }
+  if (currentPath) {
+    // pass
+  }
+
+
 
   const renderPage = () => {
     switch (router.asPath) { // Use asPath instead of pathname
@@ -90,6 +103,17 @@ export default function Home() {
         return <WorkInProgress />;
       case "/my-templates":
         return <MyTemplatesPage />;
+      case "/admin-account":
+        return <AdminAccount />;
+      case "/admin-profile":
+        return <AdminProfile />;
+      case "/admin-content":
+        return <AdminContentPage />;
+      case "/interaction-history":
+        return <InteractionHistoryPage />;
+      case "/admin-add-interaction":
+        return <AdminAddInteractionPage />;
+        
       default:
         if (router.asPath.startsWith("/templates?")) {
           return <TemplatesPage />;
@@ -102,6 +126,18 @@ export default function Home() {
         }
         if (router.asPath.startsWith("/my-blogs?")) {
           return <MyBlogsPage />;
+        }
+        if (router.asPath.startsWith("/admin-account?")) {
+          return <AdminAccount />;
+        }
+        if (router.asPath.startsWith("/admin-profile?")) {
+          return <AdminProfile />;
+        }
+        if (router.asPath.startsWith("/admin-content?")) {
+          return <AdminContentPage />;
+        }
+        if (router.asPath.startsWith("/interaction-history?")) {
+          return <InteractionHistoryPage />;
         }
         return <Custom404 />;
     }

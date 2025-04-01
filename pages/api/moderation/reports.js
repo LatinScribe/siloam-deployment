@@ -175,6 +175,7 @@ export default async function handler(req, res) {
 
         res.status(200).json(report);
     } catch (error) {
+        console.error("Error creating report:", error);
         res.status(500).json({ error: 'Could not create report' });
     }
 }

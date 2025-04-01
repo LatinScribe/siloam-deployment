@@ -1,12 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs';
+// import fs from 'fs';
 import OpenAI from "openai";
 import { toFile } from 'openai/uploads';
-import FormData from 'form-data';
+// import FormData from 'form-data';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+
+function getErrorMessage(error: unknown) {
+	if (error instanceof Error) return error.message
+	return String(error)
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -26,8 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       model: "whisper-1",
     });
     return res.status(200).json({ text: transcription.text });
-  } catch (error: any) {
-    console.error('Error transcribing audio:', error.response?.data || error.message);
+  } catch (error) {
+    console.error('Error transcribing audio:', getErrorMessage(error));
     return res.status(500).json({ error: 'Failed to transcribe audio' });
   }
 }

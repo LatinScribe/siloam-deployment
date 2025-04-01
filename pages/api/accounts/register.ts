@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { username, password, firstName, lastName, email, avatar, phoneNumber, role, output_bool } = req.body;
 
-    var output = output_bool
+    let output = output_bool
     // check if user wants output. Default to false!
     if (!output || typeof output !== "boolean") {
         output = false
@@ -100,6 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             error: "Prisma error!",
         });

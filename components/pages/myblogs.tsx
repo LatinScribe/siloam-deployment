@@ -118,7 +118,7 @@ export default function BlogsPage() {
         
     };
 
-    // Fetch templates when the search term changes
+    // Fetch templates when the search term changes 
     useEffect(() => {
         if (searchTerm) {
             searchTemplatesByTitle(searchTerm).then((templates) => {

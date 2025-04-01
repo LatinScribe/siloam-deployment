@@ -1,11 +1,11 @@
 import { SessionContext } from "@/contexts/session";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { processImage } from "@/utils/imageInterface";
+import { processImage, processImageWithHistory } from "@/utils/imageInterface";
 import { textToAudio } from "@/utils/audioInterface";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
-import { OpenAIVoice } from "@/utils/types";
+import { OpenAIVoice, Message } from "@/utils/types";
 import styled, { keyframes, css, createGlobalStyle } from 'styled-components';
 
 const voiceOptions: OpenAIVoice[] = ['alloy', 'echo', 'coral', 'ash']; // Define available voices
@@ -144,14 +144,6 @@ const WaveBar = styled.div<{ delay: number }>`
   animation-delay: ${props => props.delay}s;
 `;
 
-// Add this type definition at the top of your file
-type Message = {
-  id: string;
-  sender: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-};
-
 // Add this right after your existing styled components and before the component declaration
 // This creates the custom scrollbar styles
 const GlobalStyle = createGlobalStyle`
@@ -240,7 +232,20 @@ export default function ImageDescribePage() {
             
             setDebugInfo(prev => [...prev, `STEP 5: Calling processImage with question: "${transcriptQuestion}"`]);
             
-            const result = await processImage(capturedUrl, transcriptQuestion);
+            //const result = await processImage(capturedUrl, transcriptQuestion);
+
+            const result = await processImageWithHistory(capturedUrl, conversationHistory, transcriptQuestion);
+
+            setConversationHistory(prev => [
+                ...prev,
+                {
+                    id: `user-${Date.now()}`,
+                    role: 'user',
+                    content: transcriptQuestion,
+                    timestamp: new Date()
+                },
+            ])
+
             setError("");
             setDescription(result);
             
@@ -274,14 +279,8 @@ export default function ImageDescribePage() {
                 setConversationHistory(prev => [
                     ...prev,
                     {
-                        id: `user-${Date.now()}`,
-                        sender: 'user',
-                        content: question,
-                        timestamp: new Date()
-                    },
-                    {
                         id: `assistant-${Date.now()+1}`,
-                        sender: 'assistant',
+                        role: 'assistant',
                         content: description,
                         timestamp: new Date()
                     }
@@ -483,20 +482,20 @@ export default function ImageDescribePage() {
                                             {[...conversationHistory].reverse().map((message) => (
                                                 <div 
                                                     key={message.id} 
-                                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                                 >
                                                     <div 
                                                         className={`
                                                             max-w-[80%] px-4 py-3 rounded-2xl 
-                                                            ${message.sender === 'user' 
+                                                            ${message.role === 'user' 
                                                                 ? 'bg-blue-600 text-white rounded-tr-none' 
                                                                 : 'bg-gray-800 text-white/90 rounded-tl-none'
                                                             }
                                                         `}
                                                     >
                                                         <p className="leading-relaxed">{message.content}</p>
-                                                        <div className={`text-xs mt-1 opacity-70 ${message.sender === 'user' ? 'text-right' : ''}`}>
-                                                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        <div className={`text-xs mt-1 opacity-70 ${message.role === 'user' ? 'text-right' : ''}`}>
+                                                            {message.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ?? 'N/A'}
                                                         </div>
                                                     </div>
                                                 </div>

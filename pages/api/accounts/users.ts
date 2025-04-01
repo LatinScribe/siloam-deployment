@@ -68,8 +68,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // default to 1 and 5
-        var page_num = queryParams.page || 1;
-        var pageSize_num = queryParams.pageSize || 5;
+        const page_num = queryParams.page || 1;
+        const pageSize_num = queryParams.pageSize || 5;
 
         if (!queryParams.username) {
             return res.status(400).json({
@@ -77,39 +77,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        var firstname = queryParams.firstName_bool
+        let firstname = queryParams.firstName_bool
         // check if user wants output. Default to false!
         if (!firstname || typeof firstname !== "boolean") {
             firstname = false
         }
-        var lastName = queryParams.lastName_bool
+        let lastName = queryParams.lastName_bool
         // check if user wants output. Default to false!
         if (!lastName || typeof lastName !== "boolean") {
             lastName = false
         }
-        var email = queryParams.email_bool
+        let email = queryParams.email_bool
         // check if user wants output. Default to false!
         if (!email || typeof email !== "boolean") {
             email = false
         }
-        var avatar = queryParams.avatar_bool
+        let avatar = queryParams.avatar_bool
         // check if user wants output. Default to false!
         if (!avatar || typeof avatar !== "boolean") {
             avatar = false
         }
-        var phonenumber = queryParams.phoneNumber_bool
+        let phonenumber = queryParams.phoneNumber_bool
         // check if user wants output. Default to false!
         if (!phonenumber || typeof phonenumber !== "boolean") {
             phonenumber = false
         }
 
-        var createdat = queryParams.createdAt_bool
+        let createdat = queryParams.createdAt_bool
         // check if user wants output. Default to false!
         if (!createdat || typeof createdat !== "boolean") {
             createdat = false
         }
 
-        var role = queryParams.role_bool
+        let role = queryParams.role_bool
         // check if user wants output. Default to false!
         if (!role || typeof role !== "boolean") {
             role = false
@@ -122,7 +122,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            let where: { username?: { contains: string } } = {};
+            const where: { username?: { contains: string } } = {};
 
             where.username = {
                 contains: queryParams.username,

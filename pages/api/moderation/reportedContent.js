@@ -5,7 +5,7 @@ import prisma from "@/utils/db";
 import { verifyToken } from "@/utils/auth";
 import { verifyTokenLocal } from "@/utils/auth";
 import { attemptRefreshAccess } from "@/utils/auth";
-import { use } from "react";
+// import { use } from "react";
 import { useState } from "react";
 
 export default async function handler(req, res) {
@@ -175,6 +175,7 @@ export default async function handler(req, res) {
                 }
                 res.status(200).json({ message: useState ? 'Content hidden successfully' : 'Content unhidden successfully' });
             } catch (error) {
+                console.error("Error hiding content:", error);
                 res.status(500).json({ error: useState ? 'Could not hide content' : 'Could not unhide content' });
             }
             
@@ -218,7 +219,7 @@ export default async function handler(req, res) {
                 const pageNum = parseInt(req.query.page) || 1; // default to 1 
                 const pageSize = parseInt(req.query.pageSize) || 10; // default to 10
                 const searchQuery = req.query.search || '';
-                const author = req.query.author;
+                // const author = req.query.author;
 
                 const sortOption = req.query.sort;
                 const templateId = req.query.templateId; // for searching by code template

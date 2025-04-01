@@ -1,20 +1,21 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from "openai";
-import { OpenAIContext, contextCache, Message } from '@/lib/context';
-import { system_prompt } from '@/prompts/image_caption_prompt';
+//import { OpenAIContext, contextCache, Message } from '@/lib/context';
+//import { system_prompt } from '@/prompts/image_caption_prompt';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const user = 'admin';
+// const user = 'admin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { description, question, imageUrl } = req.body;
+    // const { description, question, imageUrl } = req.body;
+    const { question, imageUrl } = req.body;
 
     if (!imageUrl || !question) {
         return res.status(400).json({ error: "Image URL and question are required" });
